@@ -5,6 +5,7 @@ import com.mootalabs.model.AuthResponse
 import com.mootalabs.model.AuthResponseData
 import com.mootalabs.model.SignInParams
 import com.mootalabs.model.SignUpParams
+import com.mootalabs.plugins.generateToken
 import com.mootalabs.util.Response
 import io.ktor.http.*
 
@@ -26,7 +27,7 @@ class UserRepositoryImpl(
                 Response.Success(
                     data = AuthResponse(
                         data = AuthResponseData(
-                            token = "token",
+                            token = generateToken(params.email),
                             user = insertedUser
                         )
                     )
@@ -56,7 +57,7 @@ class UserRepositoryImpl(
             Response.Success(
                 data = AuthResponse(
                     data = AuthResponseData(
-                        token = "token",
+                        token = generateToken(params.email),
                         user = user
                     )
                 )
