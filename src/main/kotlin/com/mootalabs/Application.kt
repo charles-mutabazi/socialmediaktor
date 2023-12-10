@@ -1,6 +1,7 @@
 package com.mootalabs
 
 import com.mootalabs.dao.DatabaseFactory
+import com.mootalabs.di.configureDI
 import com.mootalabs.plugins.configureRouting
 import com.mootalabs.plugins.configureSecurity
 import com.mootalabs.plugins.configureSerialization
@@ -16,6 +17,7 @@ fun main() {
 fun Application.module() {
     DatabaseFactory.init()
     configureSerialization()
+    configureDI()
     configureSecurity()
     configureRouting()
 }
