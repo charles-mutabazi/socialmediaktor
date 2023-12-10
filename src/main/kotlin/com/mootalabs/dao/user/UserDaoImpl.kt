@@ -4,6 +4,7 @@ import com.mootalabs.dao.DatabaseFactory.dbQuery
 import com.mootalabs.model.SignUpParams
 import com.mootalabs.model.User
 import com.mootalabs.model.UserTable
+import com.mootalabs.security.hashPassword
 import org.jetbrains.exposed.sql.ResultRow
 import org.jetbrains.exposed.sql.insert
 import org.jetbrains.exposed.sql.select
@@ -14,7 +15,7 @@ class UserDaoImpl : UserDao {
         return dbQuery {
             val insertStatement = UserTable.insert {
                 it[email] = params.email
-                it[password] = params.password
+                it[password] = hashPassword(params.password)
                 it[name] = params.name
                 it[createdAt] = Instant.now().toString()
             }

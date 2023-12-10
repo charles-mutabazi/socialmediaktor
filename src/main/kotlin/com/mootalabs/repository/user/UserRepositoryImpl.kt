@@ -6,6 +6,7 @@ import com.mootalabs.model.AuthResponseData
 import com.mootalabs.model.SignInParams
 import com.mootalabs.model.SignUpParams
 import com.mootalabs.plugins.generateToken
+import com.mootalabs.security.hashPassword
 import com.mootalabs.util.Response
 import io.ktor.http.*
 
@@ -28,7 +29,7 @@ class UserRepositoryImpl(
                     data = AuthResponse(
                         data = AuthResponseData(
                             token = generateToken(params.email),
-                            user = insertedUser
+                            user = insertedUser.copy(password = "")
                         )
                     )
                 )
@@ -45,32 +46,36 @@ class UserRepositoryImpl(
 
     override suspend fun signIn(params: SignInParams): Response<AuthResponse> {
         val user = userDao.findByEmail(params.email)
-        if (user == null) {
-            return Response.Error(
+
+        return if (user == null) {
+            Response.Error(
                 code = HttpStatusCode.NotFound,
                 data = AuthResponse(
                     errorMessage = "User with this email does not exist"
                 )
             )
-        }
-        return if (user.password == params.password) {
-            Response.Success(
-                data = AuthResponse(
-                    data = AuthResponseData(
-                        token = generateToken(params.email),
-                        user = user
+        } else {
+            val hashedPassword = hashPassword(params.password)
+            if (user.password == hashedPassword) {
+                Response.Success(
+                    data = AuthResponse(
+                        data = AuthResponseData(
+                            token = generateToken(params.email),
+                            user = user.copy(password = "")
+                        )
                     )
                 )
-            )
-        } else {
-            Response.Error(
-                code = HttpStatusCode.Forbidden,
-                data = AuthResponse(
-                    errorMessage = "Invalid credentials"
+            } else {
+                Response.Error(
+                    code = HttpStatusCode.Forbidden,
+                    data = AuthResponse(
+                        errorMessage = "Invalid credentials"
+                    )
                 )
-            )
+            }
         }
     }
+
 
     private suspend fun userAlreadyExists(email: String): Boolean {
         return userDao.findByEmail(email) != null
